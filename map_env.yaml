@@ -1,0 +1,12 @@
+name: map
+channels:
+  - conda-forge
+dependencies: 
+  - python
+  - pip
+  - jupyter
+  - ipykernel
+  - pre-commit
+  - black
+  - pip:
+    - git+https://github.com/cytomining/cytominer-eval@f7f5b293da54d870e8ba86bacf7dbc874bb79565
