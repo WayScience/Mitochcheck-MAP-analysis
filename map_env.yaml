@@ -8,5 +8,6 @@ dependencies:
   - ipykernel
   - pre-commit
   - black
+  - pyarrow
   - pip:
     - git+https://github.com/cytomining/cytominer-eval@f7f5b293da54d870e8ba86bacf7dbc874bb79565
