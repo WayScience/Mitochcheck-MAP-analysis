@@ -80,8 +80,11 @@ pos_control_sc_data = pd.read_parquet("../data/processed/pos_control_sc_data.par
 neg_control_sc_data = pd.read_parquet("../data/processed/neg_control_sc_data.parquet").sample(frac=0.01, random_state=42)
 
 # adding the Mitocheck_Phenotypic_Class into the controls  and labels
-pos_control_sc_data.insert(0, "Mitocheck_Phenotypic_Class", "pos_control")
 neg_control_sc_data.insert(0, "Mitocheck_Phenotypic_Class", "neg_control")
+
+# adding control labels into the dataset
+training_sc_data.insert(1, "Metadata_is_control", 0)
+neg_control_sc_data.insert(1, "Metadata_is_control", 1)
 
 # droping column from trainign data since it does not exist in the controls 
 training_sc_data = training_sc_data.drop("Metadata_Object_Outline", axis=1)
@@ -91,10 +94,10 @@ training_sc_data = training_sc_data.drop("Metadata_Object_Outline", axis=1)
 
 
 # parameters for pipeline
-pos_sameby = ["Mitocheck_Phenotypic_Class"]
-pos_diffby = ['Metadata_Plate', 'Metadata_Well']
+pos_sameby = ["Mitocheck_Phenotypic_Class", "Metadata_is_control == 0"]
+pos_diffby = []
 neg_sameby = ["Metadata_Plate"]
-neg_diffby = ["Mitocheck_Phenotypic_Class"]
+neg_diffby = ["Metadata_is_control"]
 null_size = 3000
 batch_size = 3000
 
@@ -114,8 +117,8 @@ for phenotype in list(training_sc_data["Mitocheck_Phenotypic_Class"].unique()):
     selected_training = training_sc_data.loc[training_sc_data["Mitocheck_Phenotypic_Class"] == phenotype]
 
     # concatenate to positive and negative control 
-    training_w_pos = pd.concat([selected_training, pos_control_sc_data])
     training_w_neg = pd.concat([selected_training, neg_control_sc_data])
+    print(training_w_neg.head())
     
     # spliting metadata and raw feature values
     negative_training_cp_meta, negative_training_cp_feats = utils.split_data(training_w_neg, dataset="CP")
@@ -124,6 +127,7 @@ for phenotype in list(training_sc_data["Mitocheck_Phenotypic_Class"].unique()):
 
 
     # execute pipeline on negative control with trianing dataset with cp features
+    logging.info(f"Running pipeline on CP features using {phenotype} phenotype")
     cp_negative_training_result = run_pipeline(meta=negative_training_cp_meta,
                                             feats=negative_training_cp_feats,
                                             pos_sameby=pos_sameby,
@@ -135,6 +139,7 @@ for phenotype in list(training_sc_data["Mitocheck_Phenotypic_Class"].unique()):
     map_results_neg_cp.append(cp_negative_training_result)                                       
 
     # execute pipeline on negative control with trianing dataset with dp features
+    logging.info(f"Running pipeline on DP features using {phenotype} phenotype")
     dp_negative_training_result = run_pipeline(meta=negative_training_dp_meta,
                                             feats=negative_training_dp_feats,
                                             pos_sameby=pos_sameby,
@@ -146,6 +151,7 @@ for phenotype in list(training_sc_data["Mitocheck_Phenotypic_Class"].unique()):
     map_results_neg_dp.append(dp_negative_training_result)                                       
 
     # execute pipeline on negative control with trianing dataset with cp_dp features
+    logging.info(f"Running pipeline on CP and DP features using {phenotype} phenotype")
     cp_dp_negative_training_result = run_pipeline(meta=negative_training_cp_dp_meta,
                                             feats=negative_training_cp_dp_feats,
                                             pos_sameby=pos_sameby,
@@ -167,6 +173,12 @@ df = pd.concat(map_results_pos_cp)
 
 
 df.to_csv("results.csv", index=False)
+
+
+# In[13]:
+
+
+copairs.__version__
 
 
 # In[ ]:
