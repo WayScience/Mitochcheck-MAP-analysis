@@ -1,7 +1,7 @@
 name: map
 channels:
   - conda-forge
-dependencies: 
+dependencies:
   - python
   - pip
   - jupyter
@@ -11,3 +11,4 @@ dependencies:
   - pyarrow
   - pip:
     - git+https://github.com/cytomining/copairs.git@de0c5997a160c6a95d982bea3f20f0ceee2c3a22
+    - kaleido
