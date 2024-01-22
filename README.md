@@ -5,9 +5,30 @@ Utilizing the mean average precision (MAP) metric to assess  reproducibility and
 ## Installing Repo
 
 To use this repo, clone the repository into your directory:
+
 ```bash
-git clone
+git clone https://github.com/WayScience/Mitocheck-MAP-analysis && cd Mitocheck-MAP-analysis
 ```
+
+Assuming you have a conda manager installed, create environment.
+
+```bash
+conda env create -f map_env.yaml
+```
+
+Activate the envrioment:
+
+```bash
+conda activate map
+```
+
+Install repo modules:
+
+```bash
+pip install -e .
+```
+
+Now you are ready to use it!
 
 ## Downloading the data
 
