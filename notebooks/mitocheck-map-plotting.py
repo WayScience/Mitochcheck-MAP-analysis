@@ -50,7 +50,7 @@ for _file in all_files:
     elif _file.name.startswith("dp_"):
         cp_sc_mAPs.append(pd.read_csv(_file))
 
-# single-cell mAP scores
+# concat single-cell mAP scores into a df
 cp_sc_mAPs = pd.concat(cp_sc_mAPs)
 dp_sc_mAPs = pd.concat(dp_sc_mAPs)
 cp_dp_sc_mAPs = pd.concat(cp_dp_sc_mAPs)
