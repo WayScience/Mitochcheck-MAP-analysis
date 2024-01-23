@@ -166,7 +166,7 @@ cp_cols = [
     colname for colname in training_sc_data.columns if colname.startswith("CP__")
 ]
 
-# extracting only CP features
+# # extracting only CP features
 train_meta, train_features = utils.split_data(training_sc_data, dataset="CP")
 cp_data = pd.concat([train_meta, pd.DataFrame(train_features)], axis=1)
 cp_data.columns = train_meta.columns.tolist() + cp_cols

@@ -50,7 +50,7 @@ for _file in all_files:
     elif _file.name.startswith("dp_"):
         cp_sc_mAPs.append(pd.read_csv(_file))
 
-# concat single-cell mAP scores into a df
+# single-cell mAP scores
 cp_sc_mAPs = pd.concat(cp_sc_mAPs)
 dp_sc_mAPs = pd.concat(dp_sc_mAPs)
 cp_dp_sc_mAPs = pd.concat(cp_dp_sc_mAPs)
@@ -63,6 +63,8 @@ cp_dp_sc_mAPs = pd.concat(cp_dp_sc_mAPs)
 # Additional split is performed using a shuffling approach:
 # - feature_shuffled: feature values within the feature space are shuffled.
 # - phenotype_shuffled: phenotypic labels are shuffled.
+
+# grabbing all cp features (regular, feature shuffled and labeled shuffled)
 reg_cp_sc_mAPs = cp_sc_mAPs.loc[cp_sc_mAPs["shuffled"] == "non-shuffled"]
 reg_cp_sc_mAPs["feature_type"] = "CP"
 shuffled_feat_cp_sc_mAPs = cp_sc_mAPs.loc[cp_sc_mAPs["shuffled"] == "features_shuffled"]
@@ -72,6 +74,7 @@ shuffled_pheno_cp_sc_mAPs = cp_sc_mAPs.loc[
 ]
 shuffled_pheno_cp_sc_mAPs["feature_type"] = "CP"
 
+# grabbing all dp features (regular, feature shuffled and labeled shuffled)
 reg_dp_sc_mAPs = dp_sc_mAPs.loc[dp_sc_mAPs["shuffled"] == "non-shuffled"]
 reg_dp_sc_mAPs["feature_type"] = "DP"
 shuffled_feat_dp_sc_mAPs = dp_sc_mAPs.loc[dp_sc_mAPs["shuffled"] == "features_shuffled"]
@@ -81,6 +84,7 @@ shuffled_pheno_dp_sc_mAPs = dp_sc_mAPs.loc[
 ]
 shuffled_pheno_dp_sc_mAPs["feature_type"] = "DP"
 
+# Grabbing all CP_DP features (regular, features shuffled and labeled shuffled)
 reg_cp_dp_sc_mAPs = cp_dp_sc_mAPs.loc[cp_dp_sc_mAPs["shuffled"] == "non-shuffled"]
 reg_cp_dp_sc_mAPs["feature_type"] = "CP_DP"
 shuffled_feat_cp_dp_sc_mAPs = cp_dp_sc_mAPs.loc[
@@ -112,10 +116,12 @@ merged_sc_ap_scores_df = pd.concat(
     ]
 )
 
+# grouping dataframe based on phenotype levels, feature and feature types
 df_group = merged_sc_ap_scores_df.groupby(
     by=["Mitocheck_Phenotypic_Class", "feature_type", "shuffled"]
 )
 
+# calculating sampling error
 sampling_error_df = []
 for name, df in df_group:
     pheno, feature_type, shuffled_type = name
@@ -127,12 +133,13 @@ for name, df in df_group:
     sampling_error_df.append([pheno, feature_type, shuffled_type, sampling_error])
 cols = ["Mitocheck_Phenotypic_Class", "feature_type", "shuffled", "sampling_error"]
 sampling_error_df = pd.DataFrame(sampling_error_df, columns=cols)
-sampling_error_df
 
 # updating name:
 sampling_error_df.loc[
     sampling_error_df["shuffled"] == "phenotype_shuffled"
 ] = "phenotypes_shuffled"
+
+sampling_error_df.head()
 
 
 # In[6]:
@@ -147,7 +154,10 @@ for cell_id, df1 in data:
         for shuffle_type, df3 in df2.groupby(by="shuffled"):
             aggregated_ap_score = df3["average_precision"].mean()
 
+            # select a single row since all the metadata is the same
             selected_row = df3.iloc[0]
+
+            # update the average precision score of the single row
             selected_row["average_precision"] = aggregated_ap_score
             agg_sc_ap_scores_df.append(selected_row.values.tolist())
 
@@ -156,7 +166,7 @@ agg_sc_ap_scores_df = pd.DataFrame(data=agg_sc_ap_scores_df, columns=columns)
 agg_sc_ap_scores_df.to_csv(
     sc_ap_scores_dir / "merged_sc_agg_ap_scores.csv", index=False
 )
-agg_sc_ap_scores_df
+agg_sc_ap_scores_df.head()
 
 
 # In[7]:
@@ -173,7 +183,7 @@ for name, df in tuple(agg_sc_ap_scores_df.groupby(by=["feature_type", "shuffled"
 
 mAP_dfs = pd.concat(mAP_dfs)
 mAP_dfs.to_csv(agg_sc_ap_scores_dir / "sc_mAP_scores.csv", index=False)
-mAP_dfs
+mAP_dfs.head()
 
 
 # ## Forming bar plots
