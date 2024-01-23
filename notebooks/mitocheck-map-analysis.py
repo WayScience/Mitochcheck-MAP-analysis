@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[ ]:
+# In[1]:
 
 
 import logging
@@ -12,9 +12,10 @@ from typing import Optional
 import numpy as np
 import pandas as pd
 from copairs.map import run_pipeline
+from pycytominer import feature_select
 
 # imports src
-sys.path.append("../")  # noqa
+sys.path.append("../")
 from src import utils  # noqa
 
 # setting up logger
@@ -28,7 +29,7 @@ logging.basicConfig(
 # ## Helper functions
 # Set of helper functions to help out throughout the notebook
 
-# In[ ]:
+# In[2]:
 
 
 ## Helper function
@@ -116,7 +117,7 @@ def shuffle_features(feature_vals: np.array, seed: Optional[int] = 0) -> np.arra
 
 # ## Setting up Paths and loading data
 
-# In[ ]:
+# In[3]:
 
 
 # parameters
@@ -132,11 +133,13 @@ map_out_dir = pathlib.Path("../data/processed/mAP_scores/")
 map_out_dir.mkdir(parents=True, exist_ok=True)
 
 
-# In[ ]:
+# In[4]:
 
 
-training_sc_data = pd.read_parquet("../data/processed/training_sc_data.parquet")
-neg_control_sc_data = pd.read_parquet("../data/processed/neg_control_sc_data.parquet")
+# training_sc_data = pd.read_parquet("../data/processed/training_sc_data.parquet")
+# neg_control_sc_data = pd.read_parquet("../data/processed/neg_control_sc_data.parquet")
+training_sc_data = pd.read_csv(training_singlecell_data).drop("Unnamed: 0", axis=1)
+neg_control_sc_data = pd.read_csv(neg_control_data)
 
 # adding the Mitocheck_Phenotypic_Class into the controls  and labels
 neg_control_sc_data.insert(0, "Mitocheck_Phenotypic_Class", "neg_control")
@@ -149,9 +152,85 @@ neg_control_sc_data.insert(1, "Metadata_is_control", 1)
 training_sc_data = training_sc_data.drop("Metadata_Object_Outline", axis=1)
 
 
+print("control shape:", neg_control_sc_data.shape)
+print("training shape:", training_sc_data.shape)
+
+
+# ## Applying Pycytominer Selected features data
+
+# In[5]:
+
+
+# applying cytominer feature selection trianing data
+cp_cols = [
+    colname for colname in training_sc_data.columns if colname.startswith("CP__")
+]
+
+# extracting only CP features
+train_meta, train_features = utils.split_data(training_sc_data, dataset="CP")
+cp_data = pd.concat([train_meta, pd.DataFrame(train_features)], axis=1)
+cp_data.columns = train_meta.columns.tolist() + cp_cols
+
+# applying pycytominer feature select
+# had to specify the feature names since the defaults did not match
+pycytm_cp_training_feats_df = feature_select(cp_data, features=cp_cols)
+pycytm_cp_training_feats_df = pycytm_cp_training_feats_df[
+    [
+        cols
+        for cols in pycytm_cp_training_feats_df.columns.tolist()
+        if cols.startswith("CP__")
+    ]
+]
+del cp_data
+
+# now update loaded dataset with pycytominer selected features to trainin dataset
+# remove old CP features and added new pycytominer selected CP_features
+training_sc_data = training_sc_data[
+    [col for col in training_sc_data.columns.tolist() if not col.startswith("CP__")]
+]
+training_sc_data = pd.concat([training_sc_data, pycytm_cp_training_feats_df], axis=1)
+
+
+# In[7]:
+
+
+# applying cytominer feature selection negative control data
+cp_cols = [
+    colname for colname in neg_control_sc_data.columns if colname.startswith("CP__")
+]
+
+# extracting only CP features
+neg_control_meta, neg_control_features = utils.split_data(
+    neg_control_sc_data, dataset="CP"
+)
+cp_data = pd.concat([neg_control_meta, pd.DataFrame(neg_control_features)], axis=1)
+cp_data.columns = neg_control_meta.columns.tolist() + cp_cols
+
+# applying pycytominer feature select
+# had to specify the feature names since the defaults did not match
+pycytm_cp_training_feats_df = feature_select(cp_data, features=cp_cols)
+pycytm_cp_training_feats_df = pycytm_cp_training_feats_df[
+    [
+        cols
+        for cols in pycytm_cp_training_feats_df.columns.tolist()
+        if cols.startswith("CP__")
+    ]
+]
+del cp_data
+
+# now update loaded dataset with pycytominer selected features to trainin dataset
+# remove old CP features and added new pycytominer selected features
+neg_control_sc_data = neg_control_sc_data[
+    [col for col in neg_control_sc_data.columns.tolist() if not col.startswith("CP__")]
+]
+neg_control_sc_data = pd.concat(
+    [neg_control_sc_data, pycytm_cp_training_feats_df], axis=1
+)
+
+
 # ### mAP Pipeline Parameters
 
-# In[ ]:
+# In[9]:
 
 
 pos_sameby = [
@@ -171,7 +250,7 @@ n_resamples = 10
 
 # ## Running mAP Pipeline on regular dataset
 
-# In[ ]:
+# In[11]:
 
 
 # storing all map results based on postiive and negative controls and feature types
@@ -300,7 +379,7 @@ pd.concat(map_results_neg_cp_dp).to_csv(
 
 # ## Running MAP Pipeline with shuffled phenotype labels
 
-# In[ ]:
+# In[12]:
 
 
 logging.info("Running mAP pipeline with shuffled phenotype labeled data")
@@ -455,7 +534,7 @@ pd.concat(shuffled_labels_map_results_neg_cp_dp).to_csv(
 
 # ## Running MAP Pipeline with shuffled feature space
 
-# In[ ]:
+# In[13]:
 
 
 logging.info("Running mAP pipeline with shuffled feature space data")
