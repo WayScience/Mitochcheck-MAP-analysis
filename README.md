@@ -11,6 +11,7 @@ git clone https://github.com/WayScience/Mitocheck-MAP-analysis && cd Mitocheck-M
 ```
 
 Assuming you have a conda manager installed, create environment.
+The documentation to install the conda manager can be found [here](https://docs.conda.io/projects/conda/en/stable/user-guide/install/index.html)
 
 ```bash
 conda env create -f map_env.yaml
@@ -38,14 +39,14 @@ The downloaded data, comprising both the training and control datasets, is store
 The training dataset contains labeled cells, each providing information about its phenotypic state (e.g., interphase, prophase, etc.).
 Additionally, a log is generated within the `./data` directory to provide insights into the download process.
 
-## Applying mAP to single-cell mitchech data
+## Applying mAP to single-cell Mitocheck data
 
 ### Data Modifications
 
 All the analysis is condcuted in the `./notebooks` directory.
-The first notebooks that is used to analyize and generate the mAP scores is the `./notebooks/mitocheck-map-analysis.ipynb` notebook.
+The first notebooks that is used to analyze and generate the mAP scores is the `./notebooks/mitocheck-map-analysis.ipynb` notebook.
 
-Firt we load in both the the negative controls and the training (phenotypically lalbed) dataset.
+First we load in both the the negative controls and the training (phenotypically labeled) dataset.
 There were some minor modificiations to the dataset.
 All phenotypes were stored in the `Mitocheck_Phenotypic_Class` in the trianing data.
 Since there are not labeles in the negative control, we added the `Mitocheck_Phenotypic_Class` column that contains the phenotypic labeled and labeled the negative control cells as `neg_control`.
@@ -74,7 +75,7 @@ These parameters allows `copairs` to distinguish cells belonging to different ph
 The `Mitocheck_Phenotype_Class` is used to distinguish which phenotypes are presenting within the dataset.
 The `Cell_UUID` enables the selection of cells and the formation of unique pairs both within and between the same phenotypic groups.
 
-Further more, to mitigate label bias, a 1:1 ratio comparison was employed.
+Furthermore, to mitigate label bias, a 1:1 ratio comparison was employed.
 This ensures a balanced comparison between positive and negative instances.
 
 However, we use the parameter `n_resamples`, which resamples the number of control cells that one wants to use when comparing a phenotype.
@@ -85,17 +86,18 @@ Notably, the feature separation step is unique as it involves choosing from thre
 
 Each feature group undergoes two shuffling methods:
 
-1. Phenotype shuffled: Phenotypic labels are shuffled within the concatenated feature space.
+1. Phenotype shuffled: Phenotypic labels are shuffled within the concatenated feature space, while preserving the distribution of the feature space.
 2. Feature space shuffled: Actual values within the feature spaces are shuffled around.
 
 Subsequently, all of the data (shuffled and not shuffled) is fed into the `copairs.map.run_pipeline()` function, and the single-cell average precision scores (AP) are stored within the `./data/processed/sc_ap_scores` directory.
 
-Once all the single-cell AP scores are computed, we aggregate the scores for cells using the `CellUUID` calculating the mean of the AP scores.
-It's important to note that this mean does not represent the overall Average Precision (mAP) score.
-Due to the application of subsampling techniques, each labeled cell appears multiple times in the training dataset, depending on the number of subsampling iterations.
-In this analysis, we conducted 10 subsamples, resulting in labeled cells appearing 10 times.
-The aggregated results are stored in the `./data/processed/sc_ap_scores/merged_sc_agg_ap_scores.csv` file.
+Following the computation of individual single-cell AP scores, we calculate the mean AP score for cells with the same `CellUUID`.
+It's important to note that this mean doesn't represent the overall Average Precision (mAP) score.
 
+This process is essential due to subsampling techniques, where each uniquely labeled cell appears multiple times in the training dataset, depending on the number of subsampling iterations.
+In our analysis, we conducted 10 subsamples, leading to labeled cells being present 10 times in the dataset.
+
+The consolidated results are stored in the `./data/processed/sc_ap_scores/merged_sc_agg_ap_scores.csv` file. This file provides a comprehensive view of the aggregated single-cell AP scores, considering the complexities introduced by subsampling.
 Next, we utilize the `copairs.map.aggregate()` function to further aggregate the scores based on phenotypes.
 The `sameby` parameter is set to `Mitocheck_Phenotype_Class`, and a threshold of `0.5` is applied.
 This aggregation process is performed on the `merged_sc_agg_ap_scores.csv` file, grouping single-cell average precision scores based on phenotypes and assessing whether they surpass the p-value threshold.

@@ -5,7 +5,6 @@ Contains utility functions to import into the analysis
 `split_data()` was develoepd by @roshankern:
 https://github.com/WayScience/mitocheck_data/blob/63f37859d993b8de25fefe1cb8a3aac421c3e08a/utils/load_utils.py#L84
 """
-import pandas as pd
 from typing import Optional
 
 import numpy as np
@@ -30,6 +29,7 @@ def split_data(pycytominer_output: pd.DataFrame, dataset: str = "CP_and_DP"):
         metadata dataframe, feature values
 
     Credit:
+        @roshankern: https://github.com/roshankern
     """
     all_cols = pycytominer_output.columns.tolist()
 
