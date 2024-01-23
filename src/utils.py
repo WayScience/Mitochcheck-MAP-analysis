@@ -1,5 +1,5 @@
 """
-Contains utitlity functions to import into the anatysis
+Contains utility functions to import into the analysis
 
 
 `split_data()` was develoepd by @roshankern:
