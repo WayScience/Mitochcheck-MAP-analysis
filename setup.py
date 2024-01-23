@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="mitocheck-map-analysi",
+    name="mitocheck-map-analysis",
     version="0.0.1",
     packages=find_packages(),  # Automatically discover and include all packages
     author="Erik Serrano",
