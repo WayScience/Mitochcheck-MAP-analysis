@@ -1,0 +1,11 @@
+cff-version: 1.2.0
+message: Analysis repository applying mAP to Mitocheck Dataset
+title: Mitocheck mAP analysis
+authors:
+  - name: Erik Serrano
+    email: erik.serrano@cuanschutz.edu
+    affiliation: University of Colorado, Anschutz Medical Campus
+version: 1.0.0
+date-released: 2024-02-23
+repository-code: https://github.com/WayScience/Mitocheck-MAP-analysis
+license: CC0 1.0 Universal
