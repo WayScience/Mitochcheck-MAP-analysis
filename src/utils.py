@@ -5,6 +5,7 @@ Contains utility functions to import into the analysis
 `split_data()` was develoepd by @roshankern:
 https://github.com/WayScience/mitocheck_data/blob/63f37859d993b8de25fefe1cb8a3aac421c3e08a/utils/load_utils.py#L84
 """
+
 from typing import Optional
 
 import numpy as np

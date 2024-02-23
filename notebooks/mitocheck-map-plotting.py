@@ -135,9 +135,9 @@ cols = ["Mitocheck_Phenotypic_Class", "feature_type", "shuffled", "sampling_erro
 sampling_error_df = pd.DataFrame(sampling_error_df, columns=cols)
 
 # updating name:
-sampling_error_df.loc[
-    sampling_error_df["shuffled"] == "phenotype_shuffled"
-] = "phenotypes_shuffled"
+sampling_error_df.loc[sampling_error_df["shuffled"] == "phenotype_shuffled"] = (
+    "phenotypes_shuffled"
+)
 
 sampling_error_df.head()
 

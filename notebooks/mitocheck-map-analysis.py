@@ -666,9 +666,9 @@ for phenotype in list(training_sc_data["Mitocheck_Phenotypic_Class"].unique()):
             )
 
             # adding shuffle label column
-            shuffled_cp_dp_feat_negative_training_result[
-                "shuffled"
-            ] = "features_shuffled"
+            shuffled_cp_dp_feat_negative_training_result["shuffled"] = (
+                "features_shuffled"
+            )
             shuffled_cp_dp_feat_negative_training_result["seed_val"] = seed
 
             # append to list
